@@ -94,8 +94,8 @@ else
 fi
 
 #Alignment parameters 
-MULTIMAP=( "25" "30" "35")
-MISMATCH=("10" "20" "30" "40")
+SCORE=( "0.10" "0.25" "0.50")
+MATCH=("0.10" "0.25" "0.50")
 
 echo "Commencing alignments" >> ${record} 2>&1
 TZ=Australia/Adelaide date >> ${record} 2>&1
@@ -106,36 +106,36 @@ READ=$(ls *_R1_val_1.fq)
 
 for file in ${READ}; do
 
-	for iMap in "${MULTIMAP[@]}"; do
+	for iScore in "${SCORE[@]}"; do
 
-		for iMatch in "${MISMATCH[@]}"; do
+		for iMatch in "${MATCH[@]}"; do
 
 			readname=${file%_R1_val_1.fq}
 
-			echo "Running STAR for ${readname} with ${iMap} multimapping and ${iMatch} mismatches" >> ${record} 2>&1
+			echo "Running STAR for ${readname} with ${iScore} multimapping and ${iMatch} mismatches" >> ${record} 2>&1
 			
 			echo "${iMap}" >> ${multimaps}
 			echo "${iMatch}" >> ${mismatches}
 
 			#Run STAR
-			STAR --genomeDir ${indexedDIR} --sjdbGTFfile ${indexedDIR}/Annotation/GCF_001194135.1_Octopus_bimaculoides_v2_0_genomic.gtf --readFilesIn ${ReadsDIR}/${readname}_R1_val_1.fq ${ReadsDIR}/${readname}_R2_val_2.fq --outFilterMismatchNmax ${iMatch} --outFilterMultimapNmax ${iMap} --outFileNamePrefix ${alignDIR}/${readname}.STAR.${iMatch}.${iMap}. --outSAMstrandField intronMotif --outSAMattributes All --outSAMtype BAM SortedByCoordinate --alignSoftClipAtReferenceEnds No  2> align.err
+			STAR --genomeDir ${indexedDIR} --sjdbGTFfile ${indexedDIR}/Annotation/GCF_001194135.1_Octopus_bimaculoides_v2_0_genomic.gtf --readFilesIn ${ReadsDIR}/${readname}_R1_val_1.fq ${ReadsDIR}/${readname}_R2_val_2.fq --outFilterMatchNminOverLread ${iMatch} --outFilterScoreMinOverLread ${iScore} --outFileNamePrefix ${alignDIR}/${readname}.STAR.${iMatch}.${iScore}. --outSAMstrandField intronMotif --outSAMattributes All --outSAMtype BAM SortedByCoordinate --alignSoftClipAtReferenceEnds No  2> align.err
 
 	 		cd ${alignDIR}
 			# Make bam index
 			echo "Making bam index" >> ${record} 2>&1
-			samtools index ${readname}.STAR.${iMatch}.${iMap}.Aligned.sortedByCoord.out.bam 
+			samtools index ${readname}.STAR.${iMatch}.${iScore}.Aligned.sortedByCoord.out.bam 
 
 			# Move alignment information files into separate folder
-			mv ${readname}.STAR.${iMatch}.${iMap}.Log.out ${alignOutDIR} 
-			mv ${readname}.STAR.${iMatch}.${iMap}.Log.final.out ${alignOutDIR} 
-			mv ${readname}.STAR.${iMatch}.${iMap}.Log.progress.out ${alignOutDIR} 
+			mv ${readname}.STAR.${iMatch}.${iScore}.Log.out ${alignOutDIR} 
+			mv ${readname}.STAR.${iMatch}.${iScore}.Log.final.out ${alignOutDIR} 
+			mv ${readname}.STAR.${iMatch}.${iScore}.Log.progress.out ${alignOutDIR} 
 
-			echo "Completed alignment for ${readname} with ${iMap} multimapping and ${iMatch} mismatches" >> ${record} 2>&1
+			echo "Completed alignment for ${readname} with ${iScore} multimapping and ${iMatch} mismatches" >> ${record} 2>&1
 			TZ=Australia/Adelaide date >> ${record} 2>&1
 
 			cd ${ReadsDIR}
 
-			cat ${record} | mail -s "finished Alignment for map: ${iMap} and mismatch: ${iMatch}" a1654797@student.adelaide.edu.au
+			cat ${record} | mail -s "finished Alignment for map: ${iScore} and mismatch: ${iMatch}" a1654797@student.adelaide.edu.au
 		done
 
 	done
