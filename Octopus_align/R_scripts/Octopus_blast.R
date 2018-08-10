@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 library(tidyverse)
 
 setwd("~/Documents/Final_thesis/Analysis/Homology_with_Octopus/STAR_alignments/blast_alignments")
