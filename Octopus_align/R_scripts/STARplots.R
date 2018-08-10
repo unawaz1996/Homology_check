@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 # making plots for STAR alignments 
 
 library(ggplot2)
